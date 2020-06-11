@@ -1,0 +1,20 @@
+\ifnum\strcmp{\jobname}{reference}=0
+	\input{../set/preclass}
+	\documentclass{article}
+	\input{../set/default}
+	\input{../set/user}
+	\input{../set/article}
+	\begin{document}
+\fi
+%-------------------------------------------------------------------------------------------------------
+\clearpage
+\addcontentsline{toc}{section}{参考文献}
+\begin{thebibliography}{}
+	\bibitem{1}李贤平．孙伟，李林川，卢庆聪等. 基于停电区域的电力系统故障诊断的一种新模型［J］. 电网技术.2004，28（5）：30-34.\par
+	\bibitem{2}宋文琪;李启亮;金芳;吕葛;蔡艳英;胡立新;张晓飞.基于排队论的门诊化验服务效率评估与改进.中国医院管理 2014-01-05.\par
+	\bibitem{3}刘微; 刘志敏.运用排队论对医院门诊收费窗口配置的量化分析.医疗卫生装备 2009-10-15.\par
+\end{thebibliography}
+%-------------------------------------------------------------------------------------------------------
+\ifnum\strcmp{\jobname}{reference}=0
+	\end{document}
+\fi

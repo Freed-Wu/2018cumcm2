@@ -1,0 +1,34 @@
+\ifnum\strcmp{\jobname}{abstract}=0
+	\input{../set/preclass}
+	\documentclass{article}
+	\input{../set/default}
+	\input{../set/user}
+	\input{../set/article}
+	\begin{document}
+\fi
+%-------------------------------------------------------------------------------------------------------
+\setcounter{page}{1}
+\maketitle
+\thispagestyle{empty}
+\begin{abstract}
+	本文利用排队论的数学方法对突发性灾难的医疗救援进行分析，寻求能使伤病员等待救治时间最短的最优解决方案。
+	\\\indent 针对问题一，先考虑了使得每个伤病员当前的等待时间最短的贪心算法。得到的解为平均等待10分钟，最长等待46分钟。之后考虑模拟退火算法，通过尝试不同的初始值求得可能的最优解；
+	\\\indent 问题二并未给出2个救治中心协作的具体信息；如果没有限制，则与第1问解法相同；
+	\\\indent 问题三增加了限制条件，要求每个伤病员等待时间不能超过30分钟，寻找满足这一条件的解；
+	\\\indent 问题四没有给出具体输入，即伤病员到达的时间和种类，但却给出了其分布规律。先通过泊松分布的随机变量生成几组输入，再仿照问题一进行求解。	
+	\\\textbf{关键词：}排队论；贪心算法；医疗救援。
+\end{abstract}
+\clearpage
+%\begin{center}
+%	\normalsize\textbf{Summary}
+%\end{center}
+%\par\small
+%\begin{spacing}{0.5}
+%	\\\textbf{Keywords: }
+%\end{spacing}
+%\normalsize
+%\clearpage
+%-------------------------------------------------------------------------------------------------------
+\ifnum\strcmp{\jobname}{abstract}=0
+	\end{document}
+\fi

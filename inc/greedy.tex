@@ -1,0 +1,121 @@
+\ifnum\strcmp{\jobname}{greedy}=0
+	\input{../set/preclass}
+	\documentclass{article}
+	\input{../set/default}
+	\input{../set/user}
+	\input{../set/article}
+	\begin{document}
+\fi
+%-------------------------------------------------------------------------------------------------------
+\clearpage
+\section{贪心算法}
+\subsection{模型的假设与标记}
+\subsubsection{假设}
+\begin{enumerate}
+	\item 假设同种救治中心救治同种病人需要相同的时间。
+	\item 救治单元救治受伤人员的实际时间符合以平均治疗时间为均值，以3倍方差为波动范围的正态分布。
+	\item 第二问的同时救治并不意味着同时进出，而是当一组治疗单元同时治疗两个人时救治效率提高，当只治疗一个人时救治效率恢复。
+	\item 当A、B合并为一组治疗单元时A、B进入时所需时间以最短时间记录。
+	\item 1-4题中所有伤员不会因为等待时间过长而离开。
+\end{enumerate}
+\subsection{模型的建立与求解}
+\subsubsection{建立}
+考虑每个病人到达时只要有最适合的救治中心（救治时间最短）就立刻进入，如果只有不适合的救治中心也立刻进入，如果没有空闲的救治中心就开始等待，一旦有就立刻进入。
+\\\indent 贪心算法来源于 0-1 背包问题，具有时间复杂度低、计算效率高、易于实现的优点，但是容易陷入局部最优。\cite{1}我们将用贪心算法求得模拟退火算法的初始解。
+\begin{matlab}{greedy.m}
+[num,txt]=xlsread('附件：应急医疗救援的受伤人员数据1.xls','两类受伤人员员的到达时间');
+txt=char(txt(2:end,:));
+arrivals=zeros(length(num),1,'uint32');
+arrivers=zeros(length(num),1,'uint32');
+for i=1:length(num)
+	arrivals(i)=num(i)*24*60*60;%单位统一为秒
+	if txt(i)=='A'
+		arrivers(i)=0;
+	else
+		arrivers(i)=1;
+	end
+end
+rank=(1:length(num))';
+
+serve=uint32([35,40;30,45]*60);
+amax=uint32(10);
+bmax=uint32(6);
+
+server1=zeros(amax,1,'uint32');
+server2=zeros(bmax,1,'uint32');
+work=zeros(amax+bmax,1,'uint32');
+pass=zeros(length(arrivals),1,'uint32');
+i=0;%i表示病人到达的当前批次。当有病人到达但救治中心未冷却完成时会让病人等待到冷却完成后再来，即总批次会增加
+
+while i~=length(arrivals)
+	i=i+1;
+	if i>1
+		pass(i)=arrivals(i)-arrivals(i-1);
+	end
+	
+	for j=1:2%j区分救治中心
+		eval(['server=server',num2str(j),';'])
+		server=server-pass(i);%救治中心冷却时间减少
+		for k=1:length(server)
+			if server(k)<0
+				server(k)=0;
+			end
+		end
+		eval(['server',num2str(j),'=server;'])
+	end
+	
+	serverBetter=eval(['server',num2str(arrivers(i)+1)]);%判断病人种类适合哪种救治中心
+	serverWorse=eval(['server',num2str(~arrivers(i)+1)]);
+	if min(serverBetter)<=min(serverWorse)%贪心算法,但在同等情况下优先考虑更适合的救治中心
+		j=uint32(arrivers(i)+1);
+	else
+		j=uint32(~arrivers(i)+1);
+	end
+	eval(['server=server',num2str(j),';'])
+	if min(server)==0%该救治中心冷却完成
+		index=find(server==min(server));
+		server(index(1))=serve(arrivers(i)+1,j);%救治中心冷却时间增加
+		eval(['server',num2str(j),'=server;'])
+		work(index(1)+amax*(j-1))=work(index(1)+amax*(j-1))+serve(arrivers(i)+1,j);
+	else
+		arrivals=[arrivals;arrivals(i)+min(server)];
+		arrivers=[arrivers;arrivers(i)];
+		rank=[rank;rank(i)];
+		data=sortrows([arrivals,arrivers,rank],1);
+		arrivals=data(:,1);
+		arrivers=data(:,2);
+		rank=data(:,3);
+	end
+end
+queue=zeros(length(arrivals),1);
+for i=1:length(num)
+	index=find(rank==i);
+	queue(i)=arrivals(max(index))-arrivals(min(index));
+end
+disp("平均排队时间");
+disp(sum(queue)/length(num)/60);
+disp("最大排队时间");
+disp(max(queue)/60);
+disp("服务时间");
+disp(work'/60);
+\end{matlab}
+\subsubsection{求解}
+程序运行结果如下,单位为分钟。
+\begin{console}{matlab.exe}
+>> greedy
+平均排队时间
+  10.080501618122977
+
+最大排队时间
+  46.766666666666666
+
+服务时间
+   975   970   920   920   915   920   900   885   870   830   950   935   945   945   915   920
+
+>> 
+\end{console}
+\par\indent 该问题不具有最优子结构，用贪心算法求出的解未必是最优解。而且最大排队时间超过30分钟，甚至赶上了救治时间，显然不太可能算是最优解。
+%-------------------------------------------------------------------------------------------------------
+\ifnum\strcmp{\jobname}{greedy}=0
+	\end{document}
+\fi
